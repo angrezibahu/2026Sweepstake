@@ -21,26 +21,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderFixtures();
     setupAdmin();
     setupTeamClicks();
+
+    // Open on today's fixtures rather than the very first match back in June.
+    setTimeout(() => scrollFixturesToToday(false), 60);
 });
 
 // Delegated click: anywhere a team name is rendered with [data-team-click],
 // tapping it replays the right animation for that team's current state.
 function setupTeamClicks() {
-    const handler = (e) => {
+    // In the Tournament Tracker, a tap opens the team's detail card (results +
+    // current standing). Everywhere else (e.g. fixtures) it replays the animation.
+    const activate = (el) => {
+        if (document.querySelector(".anim-overlay")) return;  // one at a time
+        if (el.closest("#bracket")) {
+            showTeamDetail(el.dataset.teamClick);
+        } else {
+            playTeamStatus(el.dataset.teamClick);
+        }
+    };
+    document.addEventListener("click", (e) => {
         const el = e.target.closest("[data-team-click]");
         if (!el) return;
-        if (document.querySelector(".anim-overlay")) return;  // one at a time
         e.preventDefault();
-        playTeamStatus(el.dataset.teamClick);
-    };
-    document.addEventListener("click", handler);
+        activate(el);
+    });
     document.addEventListener("keydown", (e) => {
         if (e.key !== "Enter" && e.key !== " ") return;
         const el = e.target.closest("[data-team-click]");
         if (!el) return;
         e.preventDefault();
-        if (document.querySelector(".anim-overlay")) return;
-        playTeamStatus(el.dataset.teamClick);
+        activate(el);
     });
 }
 
@@ -83,6 +93,10 @@ function setupTabs() {
             document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
             tab.classList.add("active");
             document.getElementById(tab.dataset.tab).classList.add("active");
+            // Jump straight to today's matches when opening Fixtures & Results
+            if (tab.dataset.tab === "fixtures") {
+                requestAnimationFrame(() => scrollFixturesToToday(true));
+            }
         });
     });
 }
@@ -265,10 +279,21 @@ function renderFixtures() {
         (byDate[m.ukDate] = byDate[m.ukDate] || []).push(m);
     }
 
+    // Anchor day: today if it has matches, otherwise the next day that does
+    // (falling back to the final matchday once the tournament is over).
+    const sortedDates = Object.keys(byDate).sort();
+    const todayStr = ymdToday();
+    const anchorDate = sortedDates.find(dt => dt >= todayStr) || sortedDates[sortedDates.length - 1] || null;
+
     let html = "";
-    for (const date of Object.keys(byDate).sort()) {
+    for (const date of sortedDates) {
         const d = new Date(date + "T12:00:00Z");
-        html += `<div class="fx-day">${d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</div>`;
+        const isAnchor = date === anchorDate;
+        const dayLabel = d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+        const pill = isAnchor
+            ? `<span class="fx-today-pill">${date === todayStr ? "Today" : "Next up"}</span>`
+            : "";
+        html += `<div class="fx-day${isAnchor ? " is-today" : ""}"${isAnchor ? ' id="fx-today"' : ""}>${dayLabel}${pill}</div>`;
         for (const m of byDate[date].sort((a, b) => a.match - b.match)) {
             const rec = RESULTS[String(m.match)] || {};
             const finished = rec.status === "FINISHED";
@@ -313,6 +338,160 @@ function renderFixtures() {
         }
     }
     view.innerHTML = html;
+}
+
+// Today's date as YYYY-MM-DD (matches the ukDate keys in the schedule).
+function ymdToday() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// Scroll the page so today's fixtures sit just below the sticky tab bar.
+function scrollFixturesToToday(smooth) {
+    const anchor = document.getElementById("fx-today");
+    if (!anchor) return;
+    const tabsH = document.querySelector(".tabs")?.offsetHeight || 0;
+    const y = window.scrollY + anchor.getBoundingClientRect().top - tabsH - 10;
+    window.scrollTo({ top: Math.max(0, y), behavior: smooth ? "smooth" : "auto" });
+}
+
+// ---- Team detail card (Tournament Tracker) ----
+const TRACKER_STAGE_LONG = {
+    groups: "the group stage",
+    r32: "the Round of 32",
+    r16: "the Round of 16",
+    qf: "the Quarter-finals",
+    sf: "the Semi-finals",
+    final: "the Final",
+    winner: "the Final",
+};
+
+function matchStageLabel(m) {
+    return m.stage === "group" ? `Group ${m.group}` : (STAGE_LABEL_LONG[m.stage] || m.stage);
+}
+
+function shortDate(ymd) {
+    return new Date(ymd + "T12:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+// The team actually in a fixture slot: a resolved knockout name, or the listed
+// team when it isn't a placeholder. Mirrors fixtureSide() without the markup.
+function resolvedSideName(match, side) {
+    const rec = RESULTS[String(match.match)] || {};
+    const resolved = rec[side];
+    const ref = side === "home" ? match.home : match.away;
+    const placeholder = side === "home" ? match.homePlaceholder : match.awayPlaceholder;
+    return resolved || (placeholder ? null : ref);
+}
+
+// Every scheduled fixture this team is confirmed to be part of, in match order.
+function getTeamMatches(name) {
+    const out = [];
+    for (const m of SCHEDULE) {
+        const home = resolvedSideName(m, "home");
+        const away = resolvedSideName(m, "away");
+        if (home !== name && away !== name) continue;
+        out.push({ m, isHome: home === name, opponent: home === name ? away : home });
+    }
+    return out.sort((a, b) => a.m.match - b.m.match);
+}
+
+function teamStanding(name) {
+    const stage = getStage(name);
+    if (stage === "winner") return { cls: "champ", text: "🏆 Champions of the World!" };
+    if (isEliminated(name)) {
+        return { cls: "out", text: `Eliminated in ${TRACKER_STAGE_LONG[stage] || stage}` };
+    }
+    if (stage === "groups") return { cls: "alive", text: "Still in it — playing the group stage" };
+    return { cls: "alive", text: `Still in it — through to ${TRACKER_STAGE_LONG[stage] || stage}` };
+}
+
+function showTeamDetail(name) {
+    const team = findTeam(name);
+    if (!team) return;
+    const owner = state.assignments[name];
+    const standing = teamStanding(name);
+
+    let playedHtml = "", upcomingHtml = "";
+    let w = 0, d = 0, l = 0, gf = 0, ga = 0;
+
+    for (const { m, isHome, opponent } of getTeamMatches(name)) {
+        const rec = RESULTS[String(m.match)] || {};
+        const finished = rec.status === "FINISHED" && rec.homeScore != null;
+        const oppFlag = opponent ? teamFlag(opponent) : "";
+        const oppName = opponent ? escapeHtml(opponent) : "To be decided";
+        const stageLbl = matchStageLabel(m);
+
+        if (finished) {
+            const teamScore = isHome ? rec.homeScore : rec.awayScore;
+            const oppScore = isHome ? rec.awayScore : rec.homeScore;
+            gf += teamScore; ga += oppScore;
+            let res, badge;
+            if (teamScore > oppScore) { res = "win"; badge = "W"; w++; }
+            else if (teamScore < oppScore) { res = "loss"; badge = "L"; l++; }
+            else { res = "draw"; badge = "D"; d++; }
+            playedHtml += `
+                <li class="td-match ${res}">
+                    <span class="td-res-badge">${badge}</span>
+                    <span class="td-mid">
+                        <span class="td-vs">v <span class="td-mflag">${oppFlag}</span>${oppName}</span>
+                        <span class="td-mdate">${shortDate(m.ukDate)} &middot; ${stageLbl}</span>
+                    </span>
+                    <span class="td-mscore">${teamScore}&ndash;${oppScore}</span>
+                </li>`;
+        } else {
+            upcomingHtml += `
+                <li class="td-match upcoming">
+                    <span class="td-res-badge">⏳</span>
+                    <span class="td-mid">
+                        <span class="td-vs">v <span class="td-mflag">${oppFlag}</span>${oppName}</span>
+                        <span class="td-mdate">${shortDate(m.ukDate)} &middot; ${m.ukTime} &middot; ${stageLbl}</span>
+                    </span>
+                    <span class="td-mscore">&mdash;</span>
+                </li>`;
+        }
+    }
+
+    const recordHtml = (w + d + l)
+        ? `<div class="td-record">Played ${w + d + l} &middot; <strong>W${w} D${d} L${l}</strong> &middot; Goals ${gf}&ndash;${ga}</div>`
+        : "";
+    const playedSection = playedHtml
+        ? `<div class="td-section-title">Results so far</div><ul class="td-matches">${playedHtml}</ul>` : "";
+    const upcomingSection = upcomingHtml
+        ? `<div class="td-section-title">Still to play</div><ul class="td-matches">${upcomingHtml}</ul>` : "";
+    const noneNote = (!playedHtml && !upcomingHtml)
+        ? `<div class="td-empty">No matches scheduled yet.</div>` : "";
+
+    const overlay = document.createElement("div");
+    overlay.className = "anim-overlay team-detail";
+    overlay.innerHTML = `
+        <button class="anim-close" aria-label="Close">&times;</button>
+        <div class="td-card">
+            <div class="td-head">
+                <span class="td-flag">${team.flag}</span>
+                <div>
+                    <div class="td-name">${escapeHtml(team.name)}</div>
+                    ${owner ? `<div class="td-owner">${escapeHtml(owner)}'s team</div>` : ""}
+                </div>
+            </div>
+            <div class="td-standing ${standing.cls}">${standing.text}</div>
+            ${recordHtml}
+            ${playedSection}
+            ${upcomingSection}
+            ${noneNote}
+            <button class="td-replay" type="button">▶ Replay the animation</button>
+        </div>`;
+    document.body.appendChild(overlay);
+
+    const close = () => overlay.remove();
+    overlay.querySelector(".anim-close").addEventListener("click", close);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+    overlay.querySelector(".td-replay").addEventListener("click", () => {
+        close();
+        playTeamStatus(name);
+    });
+
+    requestAnimationFrame(() => overlay.classList.add("show"));
 }
 
 // ---- Draw Status ----
