@@ -948,17 +948,25 @@ footer .small {
     filter: none;
 }
 
-/* Result halos: gold = won, red = lost, grey = draw. */
+/* Result halos: a bold glowing ring around the football.
+   gold = won, red = lost, grey = draw. */
+.checkpoint.result-win .checkpoint-dot,
+.checkpoint.result-loss .checkpoint-dot,
+.checkpoint.result-draw .checkpoint-dot {
+    filter: none;
+    border-radius: 50%;
+}
+
 .checkpoint.result-win .checkpoint-dot {
-    filter: drop-shadow(0 0 7px rgba(255,215,0,0.95)) drop-shadow(0 0 13px rgba(255,215,0,0.55));
+    box-shadow: 0 0 0 3px #ffd700, 0 0 11px 4px rgba(255,215,0,0.85);
 }
 
 .checkpoint.result-loss .checkpoint-dot {
-    filter: drop-shadow(0 0 7px rgba(229,57,53,0.95)) drop-shadow(0 0 13px rgba(229,57,53,0.55));
+    box-shadow: 0 0 0 3px #ff3b30, 0 0 11px 4px rgba(229,57,53,0.85);
 }
 
 .checkpoint.result-draw .checkpoint-dot {
-    filter: grayscale(0.2) drop-shadow(0 0 7px rgba(176,190,197,0.9));
+    box-shadow: 0 0 0 3px #c4cdd3, 0 0 11px 4px rgba(176,190,197,0.8);
 }
 
 /* Knocked out: red cross through the football for the match they went out on. */
