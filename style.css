@@ -930,6 +930,7 @@ footer .small {
 .checkpoint.reached { opacity: 1; }
 
 .checkpoint-dot {
+    position: relative;
     width: 18px;
     height: 18px;
     font-size: 16px;
@@ -942,12 +943,44 @@ footer .small {
     content: "⚽";
 }
 
+/* Reached but not yet decided: a plain football, no halo. */
 .checkpoint.reached .checkpoint-dot {
-    filter: drop-shadow(0 0 6px rgba(255,215,0,0.8));
+    filter: none;
+}
+
+/* Result halos: gold = won, red = lost, grey = draw. */
+.checkpoint.result-win .checkpoint-dot {
+    filter: drop-shadow(0 0 7px rgba(255,215,0,0.95)) drop-shadow(0 0 13px rgba(255,215,0,0.55));
+}
+
+.checkpoint.result-loss .checkpoint-dot {
+    filter: drop-shadow(0 0 7px rgba(229,57,53,0.95)) drop-shadow(0 0 13px rgba(229,57,53,0.55));
+}
+
+.checkpoint.result-draw .checkpoint-dot {
+    filter: grayscale(0.2) drop-shadow(0 0 7px rgba(176,190,197,0.9));
+}
+
+/* Knocked out: red cross through the football for the match they went out on. */
+.checkpoint.knocked-out .checkpoint-dot::after {
+    content: "✕";
+    position: absolute;
+    inset: -4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff1f1f;
+    font-size: 24px;
+    font-weight: 900;
+    text-shadow: 0 0 4px rgba(0,0,0,0.85);
 }
 
 .checkpoint.active .checkpoint-dot {
     animation: pulseDot 1.2s ease-in-out infinite;
+}
+
+.checkpoint.knocked-out.active .checkpoint-dot {
+    animation: none;
 }
 
 @keyframes pulseDot {
