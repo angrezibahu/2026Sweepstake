@@ -57,10 +57,6 @@ function setupTeamClicks() {
 function playTeamStatus(name) {
     const team = findTeam(name);
     if (!team) return;
-    if (isEliminated(name)) {
-        playEliminationAnimation(team);
-        return;
-    }
     const stage = getStage(name);
     playAdvanceAnimation(team, "groups", stage, { review: true });
 }
@@ -394,6 +390,56 @@ function getTeamMatches(name) {
         out.push({ m, isHome: home === name, opponent: home === name ? away : home });
     }
     return out.sort((a, b) => a.m.match - b.m.match);
+}
+
+// Win / loss / draw for one finished fixture from this team's point of view.
+// Returns null if the match hasn't been played (no halo).
+function matchResultFor(teamName, m) {
+    const rec = RESULTS[String(m.match)] || {};
+    if (rec.status !== "FINISHED" || rec.homeScore == null) return null;
+    const isHome = resolvedSideName(m, "home") === teamName;
+    const teamScore = isHome ? rec.homeScore : rec.awayScore;
+    const oppScore = isHome ? rec.awayScore : rec.homeScore;
+    if (teamScore > oppScore) return "win";
+    if (teamScore < oppScore) return "loss";
+    return "draw";
+}
+
+// Checkpoint stages, indexed to line up with stagesPath in playAdvanceAnimation.
+const CHECKPOINT_STAGE_KEYS = ["group", "r32", "r16", "qf", "sf", "final", "winner"];
+
+// The halo result for one stage checkpoint: "win" (gold), "loss" (red),
+// "draw" (grey) or null (no halo — not played yet).
+function checkpointResult(teamName, stageKey, stageIdx, currentIdx, eliminated) {
+    if (stageKey === "winner") {
+        return currentIdx >= 6 ? "win" : null; // lifted the trophy
+    }
+    const results = getTeamMatches(teamName)
+        .filter(({ m }) => m.stage === stageKey)
+        .map(({ m }) => matchResultFor(teamName, m))
+        .filter(Boolean);
+
+    if (stageKey === "group") {
+        if (!results.length) return null;
+        const wins = results.filter(r => r === "win").length;
+        const losses = results.filter(r => r === "loss").length;
+        if (wins > losses) return "win";
+        if (losses > wins) return "loss";
+        return "draw";
+    }
+
+    // Knockout rounds: a single match.
+    if (!results.length) {
+        // Advanced past this round without a recorded score: count it as a win.
+        return stageIdx < currentIdx ? "win" : null;
+    }
+    const res = results[0];
+    if (res === "draw") {
+        // Decided on penalties: advancing is a win, exiting here is a loss.
+        if (stageIdx < currentIdx) return "win";
+        if (eliminated && stageIdx === currentIdx) return "loss";
+    }
+    return res;
 }
 
 function teamStanding(name) {
@@ -851,19 +897,30 @@ function playAdvanceAnimation(team, fromStage, toStage, opts = {}) {
     const startPct = (fromIdx / totalSteps) * 100;
     const endPct = (toIdx / totalSteps) * 100;
     const isWinner = toStage === "winner";
-    const stillInGroups = review && toIdx === 0;
-    const title = isWinner ? 'CHAMPIONS!'
-        : review
-            ? (stillInGroups ? 'Still flying the flag' : `Marching on!`)
-            : 'Through to the next round!';
-    const sub = isWinner ? `${escapeHtml(team.name)} lift the Jules Rimet!`
-        : review
-            ? (stillInGroups
-                ? `${escapeHtml(team.name)} are in the group stage`
-                : `${escapeHtml(team.name)} are currently in the ${getStageName(toStage)}`)
-            : `${escapeHtml(team.name)} march on to the ${getStageName(toStage)}`;
+    const eliminated = isEliminated(team.name) && !isWinner;
+    const stillInGroups = toIdx === 0;
+    let title, sub;
+    if (isWinner) {
+        title = 'CHAMPIONS!';
+        sub = `${escapeHtml(team.name)} lift the Jules Rimet!`;
+    } else if (eliminated) {
+        title = 'Knocked out';
+        sub = stillInGroups
+            ? `${escapeHtml(team.name)} went out in the group stage`
+            : `${escapeHtml(team.name)} went out in the ${getStageName(toStage)}`;
+    } else if (review) {
+        title = stillInGroups ? 'Still flying the flag' : 'Marching on!';
+        sub = stillInGroups
+            ? `${escapeHtml(team.name)} are in the group stage`
+            : `${escapeHtml(team.name)} are currently in the ${getStageName(toStage)}`;
+    } else {
+        title = 'Through to the next round!';
+        sub = `${escapeHtml(team.name)} march on to the ${getStageName(toStage)}`;
+    }
     const ownerLine = owner
-        ? (isWinner || !review ? ` &mdash; well played ${escapeHtml(owner)}!` : ` &mdash; come on ${escapeHtml(owner)}!`)
+        ? (eliminated ? ` &mdash; commiserations ${escapeHtml(owner)}`
+            : isWinner || !review ? ` &mdash; well played ${escapeHtml(owner)}!`
+            : ` &mdash; come on ${escapeHtml(owner)}!`)
         : '';
 
     const overlay = document.createElement("div");
@@ -873,12 +930,15 @@ function playAdvanceAnimation(team, fromStage, toStage, opts = {}) {
             <div class="march-track">
                 <div class="march-pitch"></div>
                 <div class="march-checkpoints">
-                    ${stagesPath.map((s, i) => `
-                        <div class="checkpoint${i <= toIdx ? ' reached' : ''}${i === toIdx ? ' active' : ''}">
+                    ${stagesPath.map((s, i) => {
+                        const result = checkpointResult(team.name, CHECKPOINT_STAGE_KEYS[i], i, toIdx, eliminated);
+                        const isExit = eliminated && i === toIdx;
+                        return `
+                        <div class="checkpoint${i <= toIdx ? ' reached' : ''}${i === toIdx ? ' active' : ''}${result ? ` result-${result}` : ''}${isExit ? ' knocked-out' : ''}">
                             <div class="checkpoint-dot"></div>
                             <div class="checkpoint-label">${s}</div>
-                        </div>
-                    `).join("")}
+                        </div>`;
+                    }).join("")}
                 </div>
                 <div class="trophy-target">
                     <div class="trophy-glow"></div>
