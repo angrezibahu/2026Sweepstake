@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-18T05:02:43Z",
+  "updatedAt": "2026-06-18T09:46:30Z",
   "results": {
     "1": {
       "match": 1,
@@ -307,11 +307,11 @@
       "away": "Colombia",
       "homeRef": "Uzbekistan",
       "awayRef": "Colombia",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 1,
+      "awayScore": 3,
+      "status": "FINISHED",
+      "winner": "Colombia",
+      "finishedAt": "2026-06-18T09:46:30Z"
     },
     "25": {
       "match": 25,
