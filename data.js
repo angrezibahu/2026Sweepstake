@@ -132,7 +132,6 @@ const DEFAULT_ASSIGNMENTS = {
     "Ghana": "Mason",
     "Panama": "Dylan"
 };
-
 // Schedule and results loaded from JSON files by loadLiveData()
 let SCHEDULE = [];
 let RESULTS = {};
@@ -140,8 +139,8 @@ let LIVE = { eliminated: [], stages: {}, updatedAt: null };
 
 async function loadLiveData() {
     try {
-        // "?v=" busts the HTTP cache (GitHub Pages caches for ~10 min); the
-        // service worker keys its data cache on the path, ignoring the query.
+        // Cache-bust so every load hits the network: GitHub Pages serves these
+        // with a max-age, and a cached copy can hide fresh results for hours.
         const v = Date.now();
         const [scheduleRes, resultsRes, trackerRes] = await Promise.all([
             fetch(`schedule.json?v=${v}`).then(r => r.ok ? r.json() : null),
