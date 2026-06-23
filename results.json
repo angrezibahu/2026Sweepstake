@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-22T22:56:58Z",
+  "updatedAt": "2026-06-23T01:23:47Z",
   "results": {
     "1": {
       "match": 1,
@@ -541,11 +541,11 @@
       "away": "Iraq",
       "homeRef": "France",
       "awayRef": "Iraq",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 3,
+      "awayScore": 0,
+      "status": "FINISHED",
+      "winner": "France",
+      "finishedAt": "2026-06-23T01:23:47Z"
     },
     "43": {
       "match": 43,
