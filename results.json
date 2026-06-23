@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-23T01:23:47Z",
+  "updatedAt": "2026-06-23T05:34:37Z",
   "results": {
     "1": {
       "match": 1,
@@ -554,11 +554,11 @@
       "away": "Senegal",
       "homeRef": "Norway",
       "awayRef": "Senegal",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 3,
+      "awayScore": 2,
+      "status": "FINISHED",
+      "winner": "Norway",
+      "finishedAt": "2026-06-23T05:34:37Z"
     },
     "44": {
       "match": 44,
