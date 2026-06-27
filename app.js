@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await loadLiveData();          // pull committed schedule + auto-updated results
     renderGroups();
+    selectCurrentStage();          // open the tracker on the round currently being played
     renderBracket();
     renderFixtures();
     setupAdmin();
@@ -171,6 +172,30 @@ function renderBracket() {
             btn.classList.add("active");
             renderBracket();
         };
+    });
+}
+
+// The round currently being contested: the furthest stage any team has reached.
+// Used to open the Tournament Tracker on the live round (e.g. once every group
+// is done it jumps to Round of 32) rather than always showing the group stage
+// with the teams that have already gone home.
+function currentStage() {
+    const stageOrder = ["groups", "r32", "r16", "qf", "sf", "final", "winner"];
+    let maxIdx = 0;
+    for (const team of getAllTeams()) {
+        const idx = stageOrder.indexOf(getStage(team.name));
+        if (idx > maxIdx) maxIdx = idx;
+    }
+    // There's no "winner" tab - the trophy lift lives under the Final.
+    return stageOrder[Math.min(maxIdx, stageOrder.indexOf("final"))];
+}
+
+// Highlight the stage button matching the current round so renderBracket() opens
+// there. Falls back to the group stage before any team has progressed.
+function selectCurrentStage() {
+    const stage = currentStage();
+    document.querySelectorAll(".stage-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.stage === stage);
     });
 }
 
