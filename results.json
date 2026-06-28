@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-28T00:15:05Z",
+  "updatedAt": "2026-06-28T04:55:27Z",
   "results": {
     "1": {
       "match": 1,
@@ -866,11 +866,11 @@
       "away": "England",
       "homeRef": "Panama",
       "awayRef": "England",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 0,
+      "awayScore": 2,
+      "status": "FINISHED",
+      "winner": "England",
+      "finishedAt": "2026-06-28T04:55:27Z"
     },
     "68": {
       "match": 68,
@@ -879,11 +879,11 @@
       "away": "Ghana",
       "homeRef": "Croatia",
       "awayRef": "Ghana",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": "FINISHED",
+      "winner": "Croatia",
+      "finishedAt": "2026-06-28T04:55:27Z"
     },
     "69": {
       "match": 69,
@@ -892,11 +892,11 @@
       "away": "Uzbekistan",
       "homeRef": "DR Congo",
       "awayRef": "Uzbekistan",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 3,
+      "awayScore": 1,
+      "status": "FINISHED",
+      "winner": "DR Congo",
+      "finishedAt": "2026-06-28T04:55:27Z"
     },
     "70": {
       "match": 70,
@@ -905,11 +905,11 @@
       "away": "Portugal",
       "homeRef": "Colombia",
       "awayRef": "Portugal",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
+      "homeScore": 0,
+      "awayScore": 0,
+      "status": "FINISHED",
       "winner": null,
-      "finishedAt": null
+      "finishedAt": "2026-06-28T04:55:27Z"
     },
     "71": {
       "match": 71,
@@ -1031,7 +1031,7 @@
     "80": {
       "match": 80,
       "stage": "r32",
-      "home": null,
+      "home": "England",
       "away": null,
       "homeRef": "1L",
       "awayRef": "3E/H/I/J/K",
@@ -1083,8 +1083,8 @@
     "84": {
       "match": 84,
       "stage": "r32",
-      "home": null,
-      "away": null,
+      "home": "Portugal",
+      "away": "Croatia",
       "homeRef": "2K",
       "awayRef": "2L",
       "homeScore": null,
@@ -1135,7 +1135,7 @@
     "88": {
       "match": 88,
       "stage": "r32",
-      "home": null,
+      "home": "Colombia",
       "away": null,
       "homeRef": "1K",
       "awayRef": "3D/E/I/J/L",
