@@ -197,6 +197,42 @@ def fetch_openfootball_matches():
     return out
 
 
+def fetch_r32_pairings(valid):
+    """Return the Round-of-32 team pairings from openfootball, regardless of score.
+
+    Used to align our third-place-slot assignments with the real bracket. FIFA's
+    allocation of the eight qualifying third-placed teams to specific R32 fixtures
+    is one particular valid permutation; picking a *different* valid permutation
+    (which plain backtracking can do) leaves a fixture with the wrong opponent, so
+    that match's result never matches the feed and it sticks on "awaiting result".
+
+    Returns a list of frozenset({home, away}) canonical-name pairs, or [] on any
+    failure so the caller stays fail-soft and falls back to its own assignment.
+    """
+    try:
+        data = _fetch_json(OPENFOOTBALL_URL)
+    except (urllib.error.URLError, urllib.error.HTTPError, ValueError) as e:
+        print(f"openfootball R32 fetch failed ({e}); using computed bracket.")
+        return []
+    pairings = []
+    for m in data.get("matches", []):
+        if (m.get("round") or "").strip().lower() != "round of 32":
+            continue
+        h, a = canon(m.get("team1"), valid), canon(m.get("team2"), valid)
+        if h and a and h != a:
+            pairings.append(frozenset((h, a)))
+    print(f"openfootball provided {len(pairings)} R32 pairing(s).")
+    return pairings
+
+
+def feed_partner(known, pairings):
+    """The team the feed pairs against `known` in R32, or None if unknown/ambiguous."""
+    if not known:
+        return None
+    others = [next(iter(p - {known})) for p in pairings if known in p]
+    return others[0] if len(others) == 1 else None
+
+
 def fetch_api_matches():
     """Return list of finished matches from football-data.org, or [] on failure."""
     if not API_TOKEN:
@@ -364,19 +400,38 @@ def group_table(schedule, results, group):
     return order
 
 
-def assign_thirds(third_slots, qualified_thirds):
+def assign_thirds(third_slots, qualified_thirds, forced=None):
     """Backtracking match: assign each R32 third-place slot a qualifying team
-    whose group is in that slot's allowed set. Returns {matchNo: team} or {}."""
+    whose group is in that slot's allowed set. Returns {matchNo: team} or {}.
+
+    `forced` ({matchNo: team}) pins slots whose occupant we already know from the
+    real bracket (the feed); each pin is validated against that slot's allowed
+    groups, and backtracking then fills only what's left. This keeps our bracket
+    matching the official third-place allocation instead of an arbitrary valid one.
+    """
     by_group = {t["group"]: t["team"] for t in qualified_thirds}
-    slots = sorted(third_slots, key=lambda s: len(s["allowed"]))  # most-constrained first
+    group_of = {t["team"]: t["group"] for t in qualified_thirds}
+    forced = forced or {}
 
     result = {}
     used = set()
 
+    # Pin the slots the feed already decides (only when the team is a qualifying
+    # third whose group is allowed here and not already taken).
+    for s in third_slots:
+        team = forced.get(s["match"])
+        g = group_of.get(team)
+        if g and g in s["allowed"] and g not in used:
+            result[s["match"]] = team
+            used.add(g)
+
+    remaining = sorted((s for s in third_slots if s["match"] not in result),
+                       key=lambda s: len(s["allowed"]))  # most-constrained first
+
     def bt(i):
-        if i == len(slots):
+        if i == len(remaining):
             return True
-        s = slots[i]
+        s = remaining[i]
         for g in s["allowed"]:
             if g in by_group and g not in used:
                 used.add(g)
@@ -387,10 +442,17 @@ def assign_thirds(third_slots, qualified_thirds):
                 del result[s["match"]]
         return False
 
-    return result if bt(0) else {}
+    if bt(0):
+        return result
+    # A feed pin made the rest unsolvable (shouldn't happen with a sane feed);
+    # ignore the pins and solve cleanly so we never regress to no assignment.
+    if forced:
+        return assign_thirds(third_slots, qualified_thirds)
+    return {}
 
 
-def derive_state(schedule, results, prev):
+def derive_state(schedule, results, prev, r32_pairings=None):
+    r32_pairings = r32_pairings or []
     by_no = {m["match"]: m for m in schedule}
     teams = sorted({m["home"] for m in schedule if not m["homePlaceholder"]} |
                    {m["away"] for m in schedule if not m["awayPlaceholder"]})
@@ -429,13 +491,20 @@ def derive_state(schedule, results, prev):
             stages[t["team"]] = "r32"
         slots = []
         for m in schedule:
+            # A third-place slot always faces a known seed (a group winner/
+            # runner-up); record it so we can read the real opponent off the feed.
             if m["stage"] == "r32" and m["awayPlaceholder"] and m["away"].startswith("3"):
-                allowed = m["away"][1:].split("/")
-                slots.append({"match": m["match"], "allowed": allowed})
+                slots.append({"match": m["match"], "allowed": m["away"][1:].split("/"),
+                              "known": qualifiers.get(m["home"])})
             if m["stage"] == "r32" and m["homePlaceholder"] and m["home"].startswith("3"):
-                allowed = m["home"][1:].split("/")
-                slots.append({"match": m["match"], "allowed": allowed, "side": "home"})
-        third_team = assign_thirds(slots, qualified_thirds)
+                slots.append({"match": m["match"], "allowed": m["home"][1:].split("/"),
+                              "side": "home", "known": qualifiers.get(m["away"])})
+        # Prefer the real bracket: the third-place team in a slot is whoever the
+        # feed pairs against that slot's known seed. Falls back to backtracking
+        # for any slot the feed can't resolve (offline, or pairing not listed).
+        forced = {s["match"]: feed_partner(s.get("known"), r32_pairings) for s in slots}
+        forced = {no: t for no, t in forced.items() if t}
+        third_team = assign_thirds(slots, qualified_thirds, forced)
 
     # ---- Knockout propagation (iterate to a fixed point) ----
     KO_NEXT_STAGE = {"r32": "r16", "r16": "qf", "qf": "sf", "sf": "final", "final": "winner"}
@@ -464,12 +533,18 @@ def derive_state(schedule, results, prev):
             rec = results["results"][str(m["match"])]
             # fill in concrete teams as they become known
             for side, ph in (("home", m["homePlaceholder"]), ("away", m["awayPlaceholder"])):
-                if rec.get(side) is None:
-                    ref = m[side]
-                    t = resolve(ref, m["match"]) if ph else ref
-                    if t:
-                        rec[side] = t
+                if not ph:
+                    if rec.get(side) is None:  # a literal team name
+                        rec[side] = m[side]
                         progressed = True
+                    continue
+                t = resolve(m[side], m["match"])
+                # Fill an empty slot, or correct a stale resolution from an earlier
+                # run (e.g. a third-place slot realigned to the real bracket) - but
+                # never rewrite the teams of a match that has already been played.
+                if t and rec.get(side) != t and rec.get("status") != "FINISHED":
+                    rec[side] = t
+                    progressed = True
             # a knockout score applied before its teams were known can't have a
             # winner yet; recompute it now that both teams are resolved
             if (rec["status"] == "FINISHED" and not rec.get("winner")
@@ -525,12 +600,22 @@ def main():
     results = load(RESULTS)
     prev_state = load(STATE, {})
 
-    changed = apply_results(schedule, results)
-    results["updatedAt"] = now_utc().strftime("%Y-%m-%dT%H:%M:%SZ")
+    valid = {m["home"] for m in schedule if not m["homePlaceholder"]}
+    valid |= {m["away"] for m in schedule if not m["awayPlaceholder"]}
+    r32_pairings = fetch_r32_pairings(valid)
 
+    changed = apply_results(schedule, results)
     # derive_state also fills concrete teams into knockout fixtures as earlier
-    # rounds finish, so persist results.json after deriving to keep them.
-    state = derive_state(schedule, results, prev_state)
+    # rounds finish (and aligns third-place slots to the real bracket).
+    state = derive_state(schedule, results, prev_state, r32_pairings)
+    # Resolving knockout teams can correct a fixture's opponent (a third-place
+    # slot realigned to match the feed); run the apply/derive pass once more so
+    # the feed result for that now-correct pairing lands in the same run.
+    changed += apply_results(schedule, results)
+    state = derive_state(schedule, results, prev_state, r32_pairings)
+
+    results["updatedAt"] = now_utc().strftime("%Y-%m-%dT%H:%M:%SZ")
+    # Persist results.json after deriving so the filled-in teams are kept.
     dump(RESULTS, results)
     dump(STATE, state)
 
