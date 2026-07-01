@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-01T18:14:52Z",
+  "updatedAt": "2026-07-01T20:15:28Z",
   "results": {
     "1": {
       "match": 1,
@@ -1037,11 +1037,11 @@
       "away": "DR Congo",
       "homeRef": "1L",
       "awayRef": "3E/H/I/J/K",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 2,
+      "awayScore": 1,
+      "status": "FINISHED",
+      "winner": "England",
+      "finishedAt": "2026-07-01T20:15:27Z"
     },
     "81": {
       "match": 81,
@@ -1190,7 +1190,7 @@
       "match": 92,
       "stage": "r16",
       "home": "Mexico",
-      "away": null,
+      "away": "England",
       "homeRef": "W79",
       "awayRef": "W80",
       "homeScore": null,
