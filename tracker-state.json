@@ -1,11 +1,12 @@
 {
-  "updatedAt": "2026-07-03T23:19:08Z",
+  "updatedAt": "2026-07-04T03:58:50Z",
   "source": "auto",
   "eliminated": [
     "Algeria",
     "Australia",
     "Austria",
     "Bosnia and Herzegovina",
+    "Cape Verde",
     "Croatia",
     "Curaçao",
     "Czechia",
@@ -35,7 +36,7 @@
   ],
   "stages": {
     "Algeria": "r32",
-    "Argentina": "r32",
+    "Argentina": "r16",
     "Australia": "r32",
     "Austria": "r32",
     "Belgium": "r16",
