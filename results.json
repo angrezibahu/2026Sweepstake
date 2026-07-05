@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-05T08:13:39Z",
+  "updatedAt": "2026-07-05T08:33:07Z",
   "results": {
     "1": {
       "match": 1,
@@ -1164,21 +1164,21 @@
     "90": {
       "match": 90,
       "stage": "r16",
-      "home": "Brazil",
-      "away": "Norway",
+      "home": "Paraguay",
+      "away": "France",
       "homeRef": "W74",
       "awayRef": "W77",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 0,
+      "awayScore": 1,
+      "status": "FINISHED",
+      "winner": "France",
+      "finishedAt": "2026-07-05T08:33:07Z"
     },
     "91": {
       "match": 91,
       "stage": "r16",
-      "home": "Paraguay",
-      "away": "France",
+      "home": "Brazil",
+      "away": "Norway",
       "homeRef": "W76",
       "awayRef": "W78",
       "homeScore": null,
@@ -1256,7 +1256,7 @@
       "match": 97,
       "stage": "qf",
       "home": "Morocco",
-      "away": null,
+      "away": "France",
       "homeRef": "W89",
       "awayRef": "W90",
       "homeScore": null,
