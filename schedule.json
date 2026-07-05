@@ -1330,8 +1330,8 @@
       "ukTime": "22:00",
       "resultsDueUTC": "2026-07-05T01:00:00Z",
       "venue": "Philadelphia",
-      "home": "W74",
-      "away": "W77",
+      "home": "W75",
+      "away": "W78",
       "homePlaceholder": true,
       "awayPlaceholder": true
     },
@@ -1344,8 +1344,8 @@
       "ukTime": "21:00",
       "resultsDueUTC": "2026-07-06T00:00:00Z",
       "venue": "New York/New Jersey (East Rutherford)",
-      "home": "W75",
-      "away": "W78",
+      "home": "W74",
+      "away": "W77",
       "homePlaceholder": true,
       "awayPlaceholder": true
     },
