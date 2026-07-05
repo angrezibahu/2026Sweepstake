@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-05T07:03:35Z",
+  "updatedAt": "2026-07-05T07:17:19Z",
   "results": {
     "1": {
       "match": 1,
@@ -1152,14 +1152,14 @@
       "match": 89,
       "stage": "r16",
       "home": "Canada",
-      "away": "Paraguay",
+      "away": "Morocco",
       "homeRef": "W73",
       "awayRef": "W75",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 0,
+      "awayScore": 3,
+      "status": "FINISHED",
+      "winner": "Morocco",
+      "finishedAt": "2026-07-05T07:17:19Z"
     },
     "90": {
       "match": 90,
@@ -1177,7 +1177,7 @@
     "91": {
       "match": 91,
       "stage": "r16",
-      "home": "Morocco",
+      "home": "Paraguay",
       "away": "France",
       "homeRef": "W76",
       "awayRef": "W78",
@@ -1230,7 +1230,7 @@
       "match": 95,
       "stage": "r16",
       "home": "Egypt",
-      "away": "Colombia",
+      "away": "Argentina",
       "homeRef": "W86",
       "awayRef": "W88",
       "homeScore": null,
@@ -1243,7 +1243,7 @@
       "match": 96,
       "stage": "r16",
       "home": "Switzerland",
-      "away": "Argentina",
+      "away": "Colombia",
       "homeRef": "W85",
       "awayRef": "W87",
       "homeScore": null,
@@ -1255,7 +1255,7 @@
     "97": {
       "match": 97,
       "stage": "qf",
-      "home": null,
+      "home": "Morocco",
       "away": null,
       "homeRef": "W89",
       "awayRef": "W90",

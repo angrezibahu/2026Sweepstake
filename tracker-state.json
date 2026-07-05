@@ -1,11 +1,12 @@
 {
-  "updatedAt": "2026-07-05T07:03:35Z",
+  "updatedAt": "2026-07-05T07:17:19Z",
   "source": "auto",
   "eliminated": [
     "Algeria",
     "Australia",
     "Austria",
     "Bosnia and Herzegovina",
+    "Canada",
     "Cape Verde",
     "Croatia",
     "Curaçao",
@@ -63,7 +64,7 @@
     "Japan": "r32",
     "Jordan": "groups",
     "Mexico": "r16",
-    "Morocco": "r16",
+    "Morocco": "qf",
     "Netherlands": "r32",
     "New Zealand": "groups",
     "Norway": "r16",
