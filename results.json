@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-05T23:15:57Z",
+  "updatedAt": "2026-07-06T04:36:43Z",
   "results": {
     "1": {
       "match": 1,
@@ -1181,11 +1181,11 @@
       "away": "Norway",
       "homeRef": "W76",
       "awayRef": "W78",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 1,
+      "awayScore": 2,
+      "status": "FINISHED",
+      "winner": "Norway",
+      "finishedAt": "2026-07-06T04:36:42Z"
     },
     "92": {
       "match": 92,
@@ -1194,11 +1194,11 @@
       "away": "England",
       "homeRef": "W79",
       "awayRef": "W80",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 2,
+      "awayScore": 3,
+      "status": "FINISHED",
+      "winner": "England",
+      "finishedAt": "2026-07-06T04:36:42Z"
     },
     "93": {
       "match": 93,
@@ -1281,8 +1281,8 @@
     "99": {
       "match": 99,
       "stage": "qf",
-      "home": null,
-      "away": null,
+      "home": "Norway",
+      "away": "England",
       "homeRef": "W91",
       "awayRef": "W92",
       "homeScore": null,
