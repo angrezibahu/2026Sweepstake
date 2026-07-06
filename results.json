@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-06T09:09:13Z",
+  "updatedAt": "2026-07-06T13:28:55Z",
   "results": {
     "1": {
       "match": 1,
@@ -1203,8 +1203,8 @@
     "93": {
       "match": 93,
       "stage": "r16",
-      "home": "Spain",
-      "away": "Portugal",
+      "home": "Portugal",
+      "away": "Spain",
       "homeRef": "W83",
       "awayRef": "W84",
       "homeScore": null,
@@ -1216,8 +1216,8 @@
     "94": {
       "match": 94,
       "stage": "r16",
-      "home": "Belgium",
-      "away": "United States",
+      "home": "United States",
+      "away": "Belgium",
       "homeRef": "W81",
       "awayRef": "W82",
       "homeScore": null,
@@ -1229,8 +1229,8 @@
     "95": {
       "match": 95,
       "stage": "r16",
-      "home": "Egypt",
-      "away": "Argentina",
+      "home": "Argentina",
+      "away": "Egypt",
       "homeRef": "W86",
       "awayRef": "W88",
       "homeScore": null,
@@ -1255,8 +1255,8 @@
     "97": {
       "match": 97,
       "stage": "qf",
-      "home": "Morocco",
-      "away": "France",
+      "home": "France",
+      "away": "Morocco",
       "homeRef": "W89",
       "awayRef": "W90",
       "homeScore": null,
