@@ -1372,8 +1372,8 @@
       "ukTime": "20:00",
       "resultsDueUTC": "2026-07-06T23:00:00Z",
       "venue": "Dallas (Arlington)",
-      "home": "W83",
-      "away": "W84",
+      "home": "W84",
+      "away": "W83",
       "homePlaceholder": true,
       "awayPlaceholder": true
     },
@@ -1386,8 +1386,8 @@
       "ukTime": "01:00",
       "resultsDueUTC": "2026-07-07T04:00:00Z",
       "venue": "Seattle",
-      "home": "W81",
-      "away": "W82",
+      "home": "W82",
+      "away": "W81",
       "homePlaceholder": true,
       "awayPlaceholder": true
     },
@@ -1400,8 +1400,8 @@
       "ukTime": "17:00",
       "resultsDueUTC": "2026-07-07T20:00:00Z",
       "venue": "Atlanta",
-      "home": "W86",
-      "away": "W87",
+      "home": "W87",
+      "away": "W86",
       "homePlaceholder": true,
       "awayPlaceholder": true
     },
@@ -1428,8 +1428,8 @@
       "ukTime": "21:00",
       "resultsDueUTC": "2026-07-10T00:00:00Z",
       "venue": "Boston (Foxborough)",
-      "home": "W89",
-      "away": "W90",
+      "home": "W90",
+      "away": "W89",
       "homePlaceholder": true,
       "awayPlaceholder": true
     },

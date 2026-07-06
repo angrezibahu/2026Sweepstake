@@ -10,6 +10,13 @@ on:
   workflow_run:
     workflows: ["Update match results"]
     types: [completed]
+  # Safety net for the rest of the tournament: the Pages backend occasionally
+  # rejects a deployment ("Deployment failed, try again later"), and GitHub can
+  # delay or skip cron firings of the results updater. Redeploying whatever is
+  # on main once an hour means a failed deploy can never leave the live site
+  # stale for more than about an hour.
+  schedule:
+    - cron: "45 * 6-19 7 *"   # hourly at :45, 6-19 July
   workflow_dispatch:
 
 permissions:
@@ -27,7 +34,7 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url || steps.retry1.outputs.page_url || steps.retry2.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -38,6 +45,26 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
+      # The Pages backend intermittently answers "Deployment failed, try again
+      # later." (~a quarter of runs during the tournament). Doing exactly that
+      # inline - up to two retries with a pause - stops a transient blip from
+      # freezing the site until the next results commit hours later.
       - name: Deploy to GitHub Pages
         id: deployment
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Pause before retrying the deployment
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 30
+      - name: Deploy to GitHub Pages (first retry)
+        id: retry1
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Pause before the final deployment attempt
+        if: steps.deployment.outcome == 'failure' && steps.retry1.outcome == 'failure'
+        run: sleep 120
+      - name: Deploy to GitHub Pages (final attempt)
+        id: retry2
+        if: steps.deployment.outcome == 'failure' && steps.retry1.outcome == 'failure'
         uses: actions/deploy-pages@v4

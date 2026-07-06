@@ -6,9 +6,13 @@ name: Update match results
 # the updated results so GitHub Pages redeploys the site automatically.
 on:
   schedule:
-    - cron: "15 * 11-30 6 *"   # hourly, 11-30 June
-    - cron: "15 * 1-19 7 *"    # hourly, 1-19 July
-  workflow_dispatch:            # allow a manual run any time
+    # GitHub fires scheduled workflows on a best-effort basis and routinely
+    # delays or drops firings (observed gaps of 2-4.5 hours on an hourly cron).
+    # Scheduling twice an hour keeps the *effective* cadence close to hourly,
+    # so overnight results reach the site before breakfast.
+    - cron: "15,45 * 11-30 6 *"   # twice hourly, 11-30 June
+    - cron: "15,45 * 1-19 7 *"    # twice hourly, 1-19 July
+  workflow_dispatch:               # allow a manual run any time
 
 permissions:
   contents: write
