@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-07T23:36:02Z",
+  "updatedAt": "2026-07-08T01:10:32Z",
   "results": {
     "1": {
       "match": 1,
@@ -1246,11 +1246,12 @@
       "away": "Colombia",
       "homeRef": "W85",
       "awayRef": "W87",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 0,
+      "awayScore": 0,
+      "status": "FINISHED",
+      "winner": "Switzerland",
+      "finishedAt": "2026-07-08T01:10:31Z",
+      "winnerSide": "home"
     },
     "97": {
       "match": 97,
@@ -1295,7 +1296,7 @@
       "match": 100,
       "stage": "qf",
       "home": "Argentina",
-      "away": null,
+      "away": "Switzerland",
       "homeRef": "W95",
       "awayRef": "W96",
       "homeScore": null,
