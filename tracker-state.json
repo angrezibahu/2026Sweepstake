@@ -1,10 +1,11 @@
 {
-  "updatedAt": "2026-07-10T22:41:24Z",
+  "updatedAt": "2026-07-10T23:38:41Z",
   "source": "auto",
   "eliminated": [
     "Algeria",
     "Australia",
     "Austria",
+    "Belgium",
     "Bosnia and Herzegovina",
     "Brazil",
     "Canada",
@@ -85,7 +86,7 @@
     "Senegal": "r32",
     "South Africa": "r32",
     "South Korea": "groups",
-    "Spain": "qf",
+    "Spain": "sf",
     "Sweden": "r32",
     "Switzerland": "qf",
     "Tunisia": "groups",
