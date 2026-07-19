@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-18T23:35:07Z",
+  "updatedAt": "2026-07-19T01:09:41Z",
   "results": {
     "1": {
       "match": 1,
@@ -1338,11 +1338,11 @@
       "away": "England",
       "homeRef": "L101",
       "awayRef": "L102",
-      "homeScore": null,
-      "awayScore": null,
-      "status": "SCHEDULED",
-      "winner": null,
-      "finishedAt": null
+      "homeScore": 4,
+      "awayScore": 6,
+      "status": "FINISHED",
+      "winner": "England",
+      "finishedAt": "2026-07-19T01:09:40Z"
     },
     "104": {
       "match": 104,
